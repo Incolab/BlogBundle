@@ -1,0 +1,57 @@
+{% extends 'IncolabBlogBundle::layout.html.twig' %}
+
+{% block body %}
+    <section class="row">
+        <article class="large-12 columns">        
+            <h1 class="text-center">{{ news.title }}</h1>
+            <p>Par <em>{{ news.author.username }}</em>, le {{ news.createdAt|date('d-m-y \\à H:i') }}
+            {% if news.updatedAt %}
+                <br/>
+                <em>modifié le {{ news.updatedAt|date('d-m-y \\à H:i') }}</em>
+            {% endif %}
+            
+            </p>
+            {{ news.content|raw }}
+        </article>
+        <div class="large-6 columns left">
+            <div class="panelCat">
+                <h3>Commentaires</h3>
+                <div class="row">
+                {% if news.comments is not empty %}
+                    {% for element in news.comments %}
+                    <div class="large-12 columns">
+                        <p>Par <strong>{{ element.author.username }}</strong> le {{ element.createdAt|date('d-m-y \\à H:i') }}
+                        {% if is_granted("ROLE_ADMIN") %}
+                            <a class="button tiny" href="{{ path('blog_admin_comment_delete', {slugNews: news.slug, commentId: element.id}) }}">Suppr</a>
+                        {% endif %}
+                        </p>
+                        {{ element.content|raw }}
+                        <hr/>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="large-12 columns">
+                        <p>Aucun commentaire actuellement</p>
+                    </div>
+                {% endif %}
+                </div>
+            </div>
+            <div class="panelCat">
+                
+                <h3>Poster un commentaire</h3>
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    {{ form_start(formComment)}}
+                    {{ form_widget(formComment) }}
+                <input type="submit" class="button" value="Submit"/>
+                    {{ form_end(formComment) }}
+                {% else %}
+                    <p class="text-center">Vous devez être connecté pour répondre aux News. <a href="{{ path('fos_user_security_login') }}">Cliquez ici</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block javascripts %}
+    <script src="/ckeditor/light/ckeditor.js"></script>
+    <script>CKEDITOR.replace( 'comment_content' );</script>
+{% endblock %}

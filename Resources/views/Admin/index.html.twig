@@ -1,0 +1,35 @@
+{% extends 'IncolabBlogBundle::layout.html.twig' %}
+
+{% block body %}
+    <div class="row">
+        <div class="large-6 columns">
+            <h2 class="text-center">News</h2>
+            <h3 class="text-center"><a class="button" href="{{ path('blog_admin_news_add') }}">Ajouter une News</a></h3>
+            <ul>
+            {% for element in news %}
+                <li>
+                    <ul>
+                        <li>{{ element.title }}</li>
+                        <li><a href="{{ path('blog_admin_news_edit', {slug: element.slug}) }}">Modifier</a> | <a href="{{ path('blog_admin_news_delete', {slug: element.slug}) }}">Supprimer</a></li>
+                        <hr/>
+                    </ul>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+        <div class="large-6 columns">
+            <h2 class="text-center">Lasts Comments</h2>
+            <ul>
+            {% for element in lastsComments %}
+                <li>
+                    <ul>
+                        <li>On News: <strong>{{ element.news.title }}</strong>{{ element.content|raw }}</li>
+                        <li><a href="{{ path('blog_admin_comment_delete', {slugNews: element.news.slug, commentId: element.id}) }}">Supprimer</a></li>
+                        <hr/>
+                    </ul>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

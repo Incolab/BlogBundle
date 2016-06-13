@@ -1,0 +1,21 @@
+blog_homepage:
+    path:   /
+    defaults: { _controller: IncolabBlogBundle:Default:index }
+
+blog_page:
+    path: /page-{page}.html
+    defaults: { _controller: IncolabBlogBundle:Default:showPage, page: 1 }
+
+blog_news_show:
+    path:   /show/{slug}.html
+    defaults: { _controller: IncolabBlogBundle:Default:showNews }
+    methods: [GET]
+    requirements:
+        slug: "[A-z0-9_-]+"
+
+blog_comment_add:
+    path:   /show/{slug}.html
+    defaults: { _controller: IncolabBlogBundle:Default:createComment }
+    methods: [POST]
+    requirements:
+        slug: "[A-z0-9_-]+"

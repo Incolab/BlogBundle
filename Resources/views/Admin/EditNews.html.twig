@@ -1,0 +1,22 @@
+{% extends 'IncolabBlogBundle::layout.html.twig' %}
+
+{% block body %}
+    <div class="row">
+        <div class="large-12 columns">
+            <h1 class="text-center">Modifier un article</h1>
+            {{ form_start(newsForm) }}
+            {{ form_widget(newsForm) }}
+            <input type="submit" class="button" value="Submit"/>
+            {{ form_end(newsForm) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/ckeditor/full/ckeditor.js"></script>
+    <script>
+                // Replace the <textarea id="editor1"> with a CKEditor
+                // instance, using default configuration.
+                CKEDITOR.replace( 'news_content' );
+            </script>
+{% endblock %}
