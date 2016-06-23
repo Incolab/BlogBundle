@@ -6,8 +6,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 
-use BlogBundle\Entity\News;
-use BlogBundle\Form\Type\NewsType;
+use Incolab\BlogBundle\Entity\News;
+use Incolab\BlogBundle\Form\Type\NewsType;
 
 class AdminController extends Controller
 {
@@ -53,7 +53,7 @@ class AdminController extends Controller
     
     public function newsEditAction($slug, Request $request)
     {
-        $news = $this->getDoctrine()->getRepository('BlogBundle:News')->findOneBySlug($slug);
+        $news = $this->getDoctrine()->getRepository('IncolabBlogBundle:News')->findOneBySlug($slug);
         //$news = new News();
         
         if ($news === NULL) {

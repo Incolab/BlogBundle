@@ -26,7 +26,7 @@ class Comment
     /**
      * @var int
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
+     * @ORM\ManyToOne(targetEntity="UserBundle\Entity\User")
      */
     private $author;
 
@@ -119,11 +119,11 @@ class Comment
     /**
      * Set author
      *
-     * @param \AppBundle\Entity\User $author
+     * @param \UserBundle\Entity\User $author
      *
      * @return Comment
      */
-    public function setAuthor(\AppBundle\Entity\User $author = null)
+    public function setAuthor(\UserBundle\Entity\User $author = null)
     {
         $this->author = $author;
 
@@ -133,7 +133,7 @@ class Comment
     /**
      * Get author
      *
-     * @return \AppBundle\Entity\User
+     * @return \UserBundle\Entity\User
      */
     public function getAuthor()
     {
