@@ -45,7 +45,7 @@
                 <input type="submit" class="button" value="Submit"/>
                     {{ form_end(formComment) }}
                 {% else %}
-                    <p class="text-center">Vous devez être connecté pour répondre aux News. <a href="{{ path('fos_user_security_login') }}">Cliquez ici</a></p>
+                    <p class="text-center">Vous devez être connecté pour répondre aux News. <a href="{{ path('user_security_login') }}">Cliquez ici</a></p>
                 {% endif %}
             </div>
         </div>
