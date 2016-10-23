@@ -38,7 +38,7 @@ class AdminController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $news->setAuthor($this->getUser());
-            $news->setSlug($this->container->get('core.transliterator')->urlize($news->getTitle()));
+            $news->setSlug($this->container->get('incolab_core.transliterator')->urlize($news->getTitle()));
             $news->setCreatedAt(new \DateTime());
             $contentparsed = $news->getContent();
             $em->persist($news);
