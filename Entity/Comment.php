@@ -2,38 +2,25 @@
 
 namespace Incolab\BlogBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Comment
- *
- * @ORM\Table(name="blog_comment")
- * @ORM\Entity(repositoryClass="Incolab\BlogBundle\Repository\CommentRepository")
  */
 class Comment
 {
     /**
      * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @var int
-     *
-     * @ORM\ManyToOne(targetEntity="UserBundle\Entity\User")
      */
     private $author;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="content", type="text")
      *
      * @Assert\NotBlank()
      * @Assert\Length(
@@ -45,18 +32,34 @@ class Comment
 
     /**
      * @var int
-     *
-     * @ORM\ManyToOne(targetEntity="Incolab\BlogBundle\Entity\News", cascade={"persist"}, inversedBy="comments")
      */
     private $news;
 
     /**
      * @var \DateTime
-     *
-     * @ORM\Column(name="createdAt", type="datetime")
      */
     private $createdAt;
-
+    
+    
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->id = null;
+    }
+    
+    /**
+     * 
+     * @param int $id
+     * @return Comment
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+        
+        return $this;
+    }
 
     /**
      * Get id
@@ -123,7 +126,7 @@ class Comment
      *
      * @return Comment
      */
-    public function setAuthor(\UserBundle\Entity\User $author = null)
+    public function setAuthor(\UserBundle\Security\User\User $author = null)
     {
         $this->author = $author;
 

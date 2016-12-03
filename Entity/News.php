@@ -2,78 +2,53 @@
 
 namespace Incolab\BlogBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-
 /**
  * News
- *
- * @ORM\Table(name="blog_news")
- * @ORM\Entity(repositoryClass="Incolab\BlogBundle\Repository\NewsRepository")
  */
 class News
 {
     /**
      * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @var string
-     *
-     * @ORM\ManyToOne(targetEntity="UserBundle\Entity\User")
      */
     private $author;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="title", type="string", length=255)
      */
     private $title;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="slug", type="string", length=255, unique=true)
      */
     private $slug;
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="content", type="text")
      */
     private $content;
 
     /**
      * @var \DateTime
-     *
-     * @ORM\Column(name="createdAt", type="datetime")
      */
     private $createdAt;
 
     /**
      * @var \DateTime
-     *
-     * @ORM\Column(name="updatedAt", type="datetime", nullable=true)
      */
     private $updatedAt;
 
     /**
      * @var bool
-     *
-     * @ORM\Column(name="isPublished", type="boolean")
      */
     private $isPublished;
     
     /**
      * @var class
-     *
-     * @ORM\OneToMany(targetEntity="Incolab\BlogBundle\Entity\Comment", mappedBy="news")
      */
     private $comments;
 
@@ -83,7 +58,22 @@ class News
      */
     public function __construct()
     {
+        $this->id = null;
         $this->comments = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+    
+    /**
+     * Set id
+     *
+     * @param string $id
+     *
+     * @return News
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     /**
@@ -247,7 +237,7 @@ class News
      *
      * @return News
      */
-    public function setAuthor(\UserBundle\Entity\User $author = null)
+    public function setAuthor(\UserBundle\Security\User\User $author = null)
     {
         $this->author = $author;
 
