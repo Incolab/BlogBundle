@@ -181,7 +181,7 @@ class NewsRepository extends Manager {
         $res = $stmt->fetch();
         $stmt->closeCursor();
 
-        return $res;
+        return $res["count"];
     }
 
     public function persist(News $news) {

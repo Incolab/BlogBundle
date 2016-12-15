@@ -25,7 +25,7 @@ class DefaultController extends Controller {
         $newsRepository = $this->get('db')->getRepository("IncolabBlogBundle:News");
         $news = $newsRepository->getIndex($limit, $offset, $this->container->getParameter('incolab_blog.news.nb_char_index'));
 
-        if ($news === NULL) {
+        if (empty($news)) {
             throw $this->createNotFoundException('Cette page n\'existe pas');
         }
 
