@@ -17,14 +17,6 @@ class AdminController extends Controller {
         return $this->render('IncolabBlogBundle:Admin:index.html.twig', array('news' => $news, 'lastsComments' => $lastsComments));
     }
 
-    public function newsCreateAction(Request $request) {
-        $form = $this->createForm(NewsType::class, new News());
-
-        $form->handleRequest($request);
-
-        return $this->render('IncolabBlogBundle:Admin:AddNews.html.twig', array('newsForm' => $form->createView()));
-    }
-
     public function newsAddAction(Request $request) {
         $news = new News();
         $form = $this->createForm(NewsType::class, $news);
