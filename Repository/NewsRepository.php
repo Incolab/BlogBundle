@@ -24,7 +24,18 @@ class NewsRepository extends Manager {
      * updatedat   | timestamp(0) without time zone | Par défaut, NULL::timestamp without time zone
      * ispublished | boolean                        | non NULL
      */
-
+    
+    const SQL_FINDWITHCOMM = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
+            . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
+            . "an.id AS an_id, an.username AS an_username, "
+            . "c.id AS c_id, c.createdat AS c_createdat, c.content AS c_content, "
+            . "ac.id AS ac_id, ac.username AS ac_username "
+            . "FROM blog_news n "
+            . "LEFT JOIN fos_user an ON n.author_id = an.id "
+            . "LEFT JOIN blog_comment c ON n.id = c.news_id "
+            . "LEFT JOIN fos_user ac ON c.author_id = ac.id "
+            . "%s";
+    
     const SQL_INDEX = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
             . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
             . "an.id AS an_id, an.username AS an_username "
@@ -113,9 +124,16 @@ class NewsRepository extends Manager {
         return $news;
     }
 
-    public function findOneAndCommBySlug($slug) {
+    public function findOneAndCommBySlug(string $slug, bool $published = true) {
 
-        $stmt = $this->dbal->prepare(self::SQL_ONEANDCOMMBYSLUG);
+        //$stmt = $this->dbal->prepare(self::SQL_ONEANDCOMMBYSLUG);
+        $filter = "WHERE n.slug = ? ";
+        if ($published) {
+            $filter = $filter . "AND n.ispublished = true ";
+        }
+        $filter = $filter . " ORDER BY c.createdat ASC";
+        $sql = sprintf(self::SQL_FINDWITHCOMM, $filter);
+        $stmt = $this->dbal->prepare($sql);
         $stmt->bindValue(1, $slug, \PDO::PARAM_STR);
         $stmt->execute();
 

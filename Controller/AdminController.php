@@ -47,7 +47,7 @@ class AdminController extends Controller {
 
     public function newsEditAction($slug, Request $request) {
         $newsRepository = $this->get("db")->getRepository('IncolabBlogBundle:News');
-        $news = $newsRepository->findOneAndCommBySlug($slug);
+        $news = $newsRepository->findOneAndCommBySlug($slug, false);
 
         if ($news === NULL) {
             throw $this->createNotFoundException('News not found.');
