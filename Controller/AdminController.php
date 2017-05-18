@@ -28,6 +28,18 @@ class AdminController extends Controller {
             $news->setSlug($this->container->get('incolab_core.transliterator')->urlize($news->getTitle()));
             $news->setCreatedAt(new \DateTime());
             $contentparsed = $news->getContent();
+
+            $newsRepository = $this->get("db")->getRepository("IncolabBlogBundle:News");
+
+            // search existing slug
+            $slug = $news->getSlug();
+            $index = 0;
+            while (($res = $newsRepository->findOneAndCommBySlug($slug, false)) !== null) {
+                $slug = sprintf("%s-%s", $news->getSlug(), $index);
+                $index++;
+            }
+            $news->setSlug($slug);
+
             $this->get("db")->getRepository("IncolabBlogBundle:News")->persist($news);
 
             $this->addFlash('success', 'La news a été ajoutée');
@@ -68,7 +80,7 @@ class AdminController extends Controller {
         if ($news === NULL) {
             throw $this->createNotFoundException('News not found.');
         }
-        
+
         $newsRepository->remove($news);
 
         $this->addFlash('success', 'News Deleted!');
@@ -82,7 +94,7 @@ class AdminController extends Controller {
         if ($comment === NULL) {
             throw $this->createNotFoundException('Ce commentaire n\'existe pas');
         }
-        
+
         $commentRepo->remove($comment);
 
         $this->addFlash('success', 'Comment deleted.');
