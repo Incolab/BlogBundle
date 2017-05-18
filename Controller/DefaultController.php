@@ -71,7 +71,7 @@ class DefaultController extends Controller {
             throw $this->createAccessDeniedException();
         }
         $newsRepository = $this->get("db")->getRepository("IncolabBlogBundle:News");
-        $news = $newsRepository->findOneAndCommentsBySlug($slug);
+        $news = $newsRepository->findOneAndCommBySlug($slug);
 
         if ($news === NULL) {
             throw $this->createNotFoundException('News not found.');
