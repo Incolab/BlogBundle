@@ -24,23 +24,22 @@ class NewsRepository extends Manager {
      * updatedat   | timestamp(0) without time zone | Par défaut, NULL::timestamp without time zone
      * ispublished | boolean                        | non NULL
      */
-    
+
     const SQL_FINDWITHCOMM = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
             . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
             . "an.id AS an_id, an.username AS an_username, "
             . "c.id AS c_id, c.createdat AS c_createdat, c.content AS c_content, "
             . "ac.id AS ac_id, ac.username AS ac_username "
             . "FROM blog_news n "
-            . "LEFT JOIN fos_user an ON n.author_id = an.id "
+            . "LEFT JOIN user_account an ON n.author_id = an.id "
             . "LEFT JOIN blog_comment c ON n.id = c.news_id "
-            . "LEFT JOIN fos_user ac ON c.author_id = ac.id "
+            . "LEFT JOIN user_account ac ON c.author_id = ac.id "
             . "%s";
-    
     const SQL_INDEX = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
             . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
             . "an.id AS an_id, an.username AS an_username "
             . "FROM blog_news n "
-            . "LEFT JOIN fos_user an ON n.author_id = an.id "
+            . "LEFT JOIN user_account an ON n.author_id = an.id "
             . "WHERE n.ispublished = true "
             . "ORDER BY n.createdat DESC "
             . "LIMIT ? OFFSET ?";
@@ -50,23 +49,23 @@ class NewsRepository extends Manager {
             . "c.id AS c_id, c.createdat AS c_createdat, c.content AS c_content, "
             . "ac.id AS ac_id, ac.username AS ac_username "
             . "FROM blog_news n "
-            . "LEFT JOIN fos_user an ON n.author_id = an.id "
+            . "LEFT JOIN user_account an ON n.author_id = an.id "
             . "LEFT JOIN blog_comment c ON n.id = c.news_id "
-            . "LEFT JOIN fos_user ac ON c.author_id = ac.id "
+            . "LEFT JOIN user_account ac ON c.author_id = ac.id "
             . "WHERE n.ispublished = true AND n.slug = ? "
             . "ORDER BY c.createdat ASC";
     const SQL_LASTSANDSUB = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
             . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
             . "an.id AS an_id, an.username AS an_username "
             . "FROM blog_news n "
-            . "LEFT JOIN fos_user an ON n.author_id = an.id "
+            . "LEFT JOIN user_account an ON n.author_id = an.id "
             . "WHERE n.ispublished = true "
             . "ORDER BY n.createdat DESC "
             . "LIMIT ?";
     const SQL_CREATEDATDESC = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
             . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
             . "an.id AS an_id, an.username AS an_username "
-            . "FROM blog_news n LEFT JOIN fos_user an ON n.author_id = an.id "
+            . "FROM blog_news n LEFT JOIN user_account an ON n.author_id = an.id "
             . "ORDER BY n.createdat DESC";
     const SQL_INSERT = "INSERT into blog_news (id, author_id, title, slug, content, createdat, updatedat, ispublished) "
             . "VALUES (nextval('blog_news_id_seq'),?,?,?,?,?,?,?)";
@@ -240,6 +239,36 @@ class NewsRepository extends Manager {
         $stmt->bindValue(1, $news->getId(), \PDO::PARAM_INT);
         $stmt->execute();
         $stmt->closeCursor();
+    }
+
+    public function create_database() {
+        $schemaManager = $this->dbal->getSchemaManager();
+
+        $fromSchema = $schemaManager->createSchema();
+
+        $schema = clone $fromSchema;
+
+        $table = $schema->createTable("blog_news");
+        $table->addColumn("id", "integer", ["unsigned" => true]);
+        $table->addColumn("author_id", "integer", ["unsigned" => true]);
+        $table->addColumn("title", "string", ["length" => 255]);
+        $table->addColumn("slug", "string", ["length" => 255]);
+        $table->addColumn("content", "text");
+        $table->addColumn("createdat", "datetime");
+        $table->addColumn("updatedat", "datetime", ["notnull" => false]);
+        $table->addColumn("ispublished", "boolean");
+
+        $table->setPrimaryKey(["id"]);
+        $table->addUniqueIndex(["slug"]);
+
+        $schema->createSequence("blog_news_id_seq");
+
+        $userTable = $schema->getTable("user_account");
+        $table->addForeignKeyConstraint($userTable, ["author_id"], ["id"], ["onDelete" => "CASCADE"]);
+
+        $sql = $fromSchema->getMigrateToSql($schema, $this->dbal->getDatabasePlatform());
+
+        return $sql;
     }
 
 }

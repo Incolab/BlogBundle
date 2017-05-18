@@ -13,9 +13,9 @@ use Incolab\BlogBundle\Repository\NewsRepository;
  */
 class CommentRepository extends Manager {
     /*
-     *  id        | integer                        | non NULL
-     * author_id | integer                        |
-     * news_id   | integer                        |
+     * id        | integer                        | non NULL
+     * author_id | integer                        | non NULL
+     * news_id   | integer                        | non NULL
      * content   | text                           | non NULL
      * createdat | timestamp(0) without time zone | non NULL
      * Index :
@@ -24,7 +24,7 @@ class CommentRepository extends Manager {
      * "idx_7882efeff675f31b" btree (author_id)
      * Contraintes de clés étrangères :
      * "fk_7882efefb5a459a0" FOREIGN KEY (news_id) REFERENCES blog_news(id)
-     * "fk_7882efeff675f31b" FOREIGN KEY (author_id) REFERENCES fos_user(id)
+     * "fk_7882efeff675f31b" FOREIGN KEY (author_id) REFERENCES user_account(id)
      */
 
     const SQL_GETLASTS = "SELECT c.id AS c_id, c.author_id AS c_author_id, c.content AS c_content, c.createdat AS c_createdat,"
@@ -32,7 +32,7 @@ class CommentRepository extends Manager {
             . "n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
             . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished "
             . "FROM blog_comment c "
-            . "LEFT JOIN fos_user ac ON c.author_id = ac.id LEFT JOIN blog_news n ON c.news_id = n.id "
+            . "LEFT JOIN user_account ac ON c.author_id = ac.id LEFT JOIN blog_news n ON c.news_id = n.id "
             . "ORDER BY c.createdat DESC LIMIT ?";
     const SQL_INSERT = "INSERT INTO blog_comment (id, author_id, news_id, content, createdat) "
             . "VALUES (nextval('blog_comment_id_seq'),?,?,?,?)";
@@ -55,20 +55,20 @@ class CommentRepository extends Manager {
                 . "n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
                 . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished "
                 . "FROM blog_comment c "
-                . "LEFT JOIN fos_user ac ON c.author_id = ac.id LEFT JOIN blog_news n ON c.news_id = n.id "
+                . "LEFT JOIN user_account ac ON c.author_id = ac.id LEFT JOIN blog_news n ON c.news_id = n.id "
                 . "WHERE c.id = ? AND n.slug = ?";
-        
+
         $stmt = $this->dbal->prepare($sql);
         $stmt->bindValue(1, $commentId, \PDO::PARAM_INT);
         $stmt->bindValue(2, $slugNews, \PDO::PARAM_STR);
         $stmt->execute();
         $res = $stmt->fetch();
         $stmt->closeCursor();
-        
+
         if ($res === null) {
             return false;
         }
-        
+
         $comm = self::hydrateComment($res, "c");
         $comm->setNews(NewsRepository::hydrateNews($res, "n"));
 
@@ -134,6 +134,33 @@ class CommentRepository extends Manager {
         $stmt->bindValue(1, $comment->getId(), \PDO::PARAM_INT);
         $stmt->execute();
         $stmt->closeCursor();
+    }
+
+    public function create_database() {
+        $schemaManager = $this->dbal->getSchemaManager();
+
+        $fromSchema = $schemaManager->createSchema();
+
+        $schema = clone $fromSchema;
+
+        $table = $schema->createTable("blog_comment");
+        $table->addColumn("id", "integer", ["unsigned" => true]);
+        $table->addColumn("author_id", "integer", ["unsigned" => true]);
+        $table->addColumn("news_id", "integer", ["unsigned" => true]);
+        $table->addColumn("content", "text");
+        $table->addColumn("createdat", "datetime");
+
+        $table->setPrimaryKey(["id"]);
+        $schema->createSequence("blog_comment_id_seq");
+
+        $userTable = $schema->getTable("user_account");
+        $table->addForeignKeyConstraint($userTable, ["author_id"], ["id"], ["onDelete" => "CASCADE"]);
+        $newsTable = $schema->getTable("blog_news");
+        $table->addForeignKeyConstraint($newsTable, ["news_id"], ["id"], ["onDelete" => "CASCADE"]);
+
+        $sql = $fromSchema->getMigrateToSql($schema, $this->dbal->getDatabasePlatform());
+
+        return $sql;
     }
 
 }
