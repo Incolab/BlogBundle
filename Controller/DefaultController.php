@@ -6,6 +6,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Incolab\BlogBundle\Entity\Comment;
 use Incolab\BlogBundle\Form\Type\CommentType;
+use Incolab\BlogBundle\IncolabBlogEvents;
+use Incolab\BlogBundle\Event\CommentEvent;
 
 class DefaultController extends Controller {
 
@@ -87,6 +89,14 @@ class DefaultController extends Controller {
             $comment->setNews($news);
             $comment->setCreatedAt(new \DateTime());
 
+            $event = new CommentEvent($comment);
+            $this->get("event_dispatcher")->dispatch(IncolabBlogEvents::ON_COMMENT_POST, $event);
+
+            if (!$event->isValid()) {
+                $this->addFlash('error', $event->getMessageStatus());
+                return $this->render('IncolabBlogBundle:News:show.html.twig', ['comment' => $comment, 'news' => $news, 'formComment' => $formComment->createView()]);
+            }
+
             $commentRepository = $this->get('db')->getRepository("IncolabBlogBundle:Comment");
             $commentRepository->persist($comment);
 
@@ -94,7 +104,7 @@ class DefaultController extends Controller {
 
             return $this->redirectToRoute('blog_news_show', ['slug' => $news->getSlug()]);
         }
-        
+
         return $this->render('IncolabBlogBundle:News:show.html.twig', ['comment' => $comment, 'news' => $news, 'formComment' => $formComment->createView()]);
     }
 
