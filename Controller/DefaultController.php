@@ -25,7 +25,7 @@ class DefaultController extends Controller {
         $offset = ($page - 1) * $limit;
         // getIndex(@limit, @offset, @nbCaracters)
         $newsRepository = $this->get('db')->getRepository("IncolabBlogBundle:News");
-        $news = $newsRepository->getIndex($limit, $offset, $this->container->getParameter('incolab_blog.news.nb_char_index'));
+        $news = $newsRepository->getIndex($limit, $offset);
 
         if (empty($news)) {
             throw $this->createNotFoundException('Cette page n\'existe pas');

@@ -89,7 +89,7 @@ class NewsRepository extends Manager {
         return $news;
     }
 
-    public function getIndex($limit, $offset, $nbCaracters) {
+    public function getIndex($limit, $offset) {
         $stmt = $this->dbal->prepare(self::SQL_INDEX);
         $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
         $stmt->bindValue(2, $offset, \PDO::PARAM_INT);
@@ -97,14 +97,7 @@ class NewsRepository extends Manager {
 
         $allNews = [];
         while ($res = $stmt->fetch()) {
-            $news = self::hydrateNews($res, "n");
-            if (strlen($news->getContent()) > $nbCaracters) {
-                $debut = substr($news->getContent(), 0, $nbCaracters);
-                $debut = substr($debut, 0, strrpos($debut, ' ')) . '...';
-
-                $news->setContent($debut);
-            }
-            $allNews[] = $news;
+            $allNews[] = self::hydrateNews($res, "n");
         }
         $stmt->closeCursor();
 

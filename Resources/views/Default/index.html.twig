@@ -14,7 +14,7 @@
             <article class="large-6 medium-6 columns">
                 <div class="panelGrey" data-equalizer-watch>
                     <h2 class="text-center vert"><a href="{{ path('blog_news_show', {slug: element.slug}) }}">{{ element.title }}</a></h2>
-                    <p>{{ element.content|raw }}</p>
+                    <p>{{ element.content|striptags|slice(0, 150)|raw }}...<a href="{{ path("blog_news_show", {"slug": element.slug}) }}">[lire la suite]</a></p>
                 </div>
             </article>
         {% if loop.index == 2 or  loop.index ==  4 or loop.index ==  6 %}
