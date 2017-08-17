@@ -39,7 +39,7 @@ class CommentRepository extends Manager {
     const SQL_UPDATE = "UPDATE blog_comment SET author_id = ?, news_id = ?, content = ?, createdat = ? "
             . "WHERE id = ?";
 
-    public static function hydrateComment($data = [], $key = "") {
+    public static function hydrate($data = [], $key = "") {
         $comm = new Comment();
         $comm->setId($data[$key . "_id"])
                 ->setAuthor(UserRepository::lightHydrateUser($data, "a" . $key))
@@ -69,8 +69,8 @@ class CommentRepository extends Manager {
             return false;
         }
 
-        $comm = self::hydrateComment($res, "c");
-        $comm->setNews(NewsRepository::hydrateNews($res, "n"));
+        $comm = self::hydrate($res, "c");
+        $comm->setNews(NewsRepository::hydrate($res, "n"));
 
         return $comm;
     }
@@ -82,8 +82,8 @@ class CommentRepository extends Manager {
 
         $comments = [];
         while ($res = $stmt->fetch()) {
-            $comment = self::hydrateComment($res, "c");
-            $comment->setNews(NewsRepository::hydrateNews($res, "n"));
+            $comment = self::hydrate($res, "c");
+            $comment->setNews(NewsRepository::hydrate($res, "n"));
             $comments[] = $comment;
         }
         $stmt->closeCursor();

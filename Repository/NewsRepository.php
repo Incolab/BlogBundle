@@ -72,7 +72,7 @@ class NewsRepository extends Manager {
     const SQL_UPDATE = "UPDATE blog_news SET author_id = ?, title = ?, slug = ?, content = ?, createdat = ?, updatedat = ?, ispublished = ? "
             . "WHERE id = ?";
 
-    public static function hydrateNews($data = [], $key = "") {
+    public static function hydrate($data = [], $key = "") {
         $news = new News();
         $news->setId($data[$key . "_id"])
                 ->setTitle($data[$key . "_title"])
@@ -97,7 +97,7 @@ class NewsRepository extends Manager {
 
         $allNews = [];
         while ($res = $stmt->fetch()) {
-            $allNews[] = self::hydrateNews($res, "n");
+            $allNews[] = self::hydrate($res, "n");
         }
         $stmt->closeCursor();
 
@@ -109,7 +109,7 @@ class NewsRepository extends Manager {
 
         $news = [];
         while ($res = $stmt->fetch()) {
-            $news[] = self::hydrateNews($res, "n");
+            $news[] = self::hydrate($res, "n");
         }
         $stmt->closeCursor();
 
@@ -132,10 +132,10 @@ class NewsRepository extends Manager {
         $news = null;
         while ($res = $stmt->fetch()) {
             if ($news === null) {
-                $news = self::hydrateNews($res, "n");
+                $news = self::hydrate($res, "n");
             }
             if ($res["c_id"]) {
-                $news->addComment(CommentRepository::hydrateComment($res, "c"));
+                $news->addComment(CommentRepository::hydrate($res, "c"));
             }
         }
         $stmt->closeCursor();
@@ -143,23 +143,14 @@ class NewsRepository extends Manager {
         return $news;
     }
 
-    public function getLastsDESCAndSub($nbNews, $nbCaracters) {
+    public function findLasts($nbNews) {
         $stmt = $this->dbal->prepare(self::SQL_LASTSANDSUB);
         $stmt->bindValue(1, $nbNews, \PDO::PARAM_INT);
         $stmt->execute();
 
         $allNews = [];
         while ($res = $stmt->fetch()) {
-            $news = self::hydrateNews($res, "n");
-
-            if (strlen($news->getContent()) > $nbCaracters) {
-                $debut = substr($news->getContent(), 0, $nbCaracters);
-                $debut = substr($debut, 0, strrpos($debut, ' ')) . '...';
-
-                $news->setContent($debut);
-            }
-
-            $allNews[] = $news;
+            $allNews[] = self::hydrate($res, "n");
         }
         $stmt->closeCursor();
 
