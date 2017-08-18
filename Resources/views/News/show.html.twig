@@ -40,10 +40,10 @@
                 
                 <h3>Poster un commentaire</h3>
                 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                    {{ form_start(formComment)}}
-                    {{ form_widget(formComment) }}
+                    {{ form_start(form)}}
+                    {{ form_widget(form) }}
                 <input type="submit" class="button" value="Submit"/>
-                    {{ form_end(formComment) }}
+                    {{ form_end(form) }}
                 {% else %}
                     <p class="text-center">Vous devez être connecté pour répondre aux News. <a href="{{ path('user_security_login') }}">Cliquez ici</a></p>
                 {% endif %}
