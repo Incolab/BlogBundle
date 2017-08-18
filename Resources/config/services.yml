@@ -2,3 +2,10 @@ services:
 #    blog.example:
 #        class: BlogBundle\Example
 #        arguments: [@service_id, "plain_value", %parameter%]
+    blog.comment:
+        class: Incolab\BlogBundle\Service\CommentService
+        arguments:
+            $dbal: '@db'
+            $evt: '@event_dispatcher'
+            $requests: '@request_stack'
+            $fFactory: '@form.factory'
