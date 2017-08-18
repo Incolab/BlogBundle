@@ -1,76 +1,30 @@
 <?php
 
+/**
+ * Repository File
+ * 
+ * @author David Salbei <david@incolab.fr>
+ * @copyright 2017 Incolab
+ * @licence https://opensource.org/licenses/MIT MIT
+ * 
+ */
+
 namespace Incolab\BlogBundle\Repository;
 
 use Incolab\DBALBundle\Manager\Manager;
-use UserBundle\Security\User\User;
+use Incolab\BlogBundle\Repository\NewsSQL;
 use Incolab\BlogBundle\Entity\News;
 use UserBundle\Repository\UserRepository;
 use Incolab\BlogBundle\Repository\CommentRepository;
 
 /**
- * NewsRepository
+ * Repository fro the News Entity
+ *
+ * @author David Salbei <david@incolab.fr>
+ * @copyright 2017 Incolab
+ * @licence https://opensource.org/licenses/MIT MIT
  */
 class NewsRepository extends Manager {
-    /*
-     * Table name: blog_news
-     * 
-     *  id         | integer                        | non NULL                                                                                                                                                                                                                       
-     * author_id   | integer                        |
-     * title       | character varying(255)         | non NULL
-     * slug        | character varying(255)         | non NULL
-     * content     | text                           | non NULL
-     * createdat   | timestamp(0) without time zone | non NULL
-     * updatedat   | timestamp(0) without time zone | Par défaut, NULL::timestamp without time zone
-     * ispublished | boolean                        | non NULL
-     */
-
-    const SQL_FINDWITHCOMM = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
-            . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
-            . "an.id AS an_id, an.username AS an_username, "
-            . "c.id AS c_id, c.createdat AS c_createdat, c.content AS c_content, "
-            . "ac.id AS ac_id, ac.username AS ac_username "
-            . "FROM blog_news n "
-            . "LEFT JOIN user_account an ON n.author_id = an.id "
-            . "LEFT JOIN blog_comment c ON n.id = c.news_id "
-            . "LEFT JOIN user_account ac ON c.author_id = ac.id "
-            . "%s";
-    const SQL_INDEX = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
-            . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
-            . "an.id AS an_id, an.username AS an_username "
-            . "FROM blog_news n "
-            . "LEFT JOIN user_account an ON n.author_id = an.id "
-            . "WHERE n.ispublished = true "
-            . "ORDER BY n.createdat DESC "
-            . "LIMIT ? OFFSET ?";
-    const SQL_ONEANDCOMMBYSLUG = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
-            . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
-            . "an.id AS an_id, an.username AS an_username, "
-            . "c.id AS c_id, c.createdat AS c_createdat, c.content AS c_content, "
-            . "ac.id AS ac_id, ac.username AS ac_username "
-            . "FROM blog_news n "
-            . "LEFT JOIN user_account an ON n.author_id = an.id "
-            . "LEFT JOIN blog_comment c ON n.id = c.news_id "
-            . "LEFT JOIN user_account ac ON c.author_id = ac.id "
-            . "WHERE n.ispublished = true AND n.slug = ? "
-            . "ORDER BY c.createdat ASC";
-    const SQL_LASTSANDSUB = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
-            . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
-            . "an.id AS an_id, an.username AS an_username "
-            . "FROM blog_news n "
-            . "LEFT JOIN user_account an ON n.author_id = an.id "
-            . "WHERE n.ispublished = true "
-            . "ORDER BY n.createdat DESC "
-            . "LIMIT ?";
-    const SQL_CREATEDATDESC = "SELECT n.id AS n_id, n.author_id AS n_author_id, n.title AS n_title, n.slug AS n_slug, "
-            . "n.content AS n_content, n.createdat AS n_createdat, n.updatedat AS n_updatedat, n.ispublished AS n_ispublished, "
-            . "an.id AS an_id, an.username AS an_username "
-            . "FROM blog_news n LEFT JOIN user_account an ON n.author_id = an.id "
-            . "ORDER BY n.createdat DESC";
-    const SQL_INSERT = "INSERT into blog_news (id, author_id, title, slug, content, createdat, updatedat, ispublished) "
-            . "VALUES (nextval('blog_news_id_seq'),?,?,?,?,?,?,?)";
-    const SQL_UPDATE = "UPDATE blog_news SET author_id = ?, title = ?, slug = ?, content = ?, createdat = ?, updatedat = ?, ispublished = ? "
-            . "WHERE id = ?";
 
     public static function hydrate($data = [], $key = "") {
         $news = new News();
@@ -90,7 +44,8 @@ class NewsRepository extends Manager {
     }
 
     public function getIndex($limit, $offset) {
-        $stmt = $this->dbal->prepare(self::SQL_INDEX);
+        $sql = sprintf(NewsSQL::SQL_FIND, "WHERE n.ispublished = true ORDER BY n.createdat DESC LIMIT ? OFFSET ?");
+        $stmt = $this->dbal->prepare($sql);
         $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
         $stmt->bindValue(2, $offset, \PDO::PARAM_INT);
         $stmt->execute();
@@ -105,7 +60,8 @@ class NewsRepository extends Manager {
     }
 
     public function getByCreatedAtDESC() {
-        $stmt = $this->dbal->query(self::SQL_CREATEDATDESC);
+        $sql = sprintf(NewsSQL::SQL_FIND, "ORDER BY n.createdat DESC");
+        $stmt = $this->dbal->query($sql);
 
         $news = [];
         while ($res = $stmt->fetch()) {
@@ -117,14 +73,12 @@ class NewsRepository extends Manager {
     }
 
     public function findOneAndCommBySlug(string $slug, bool $published = true) {
-
-        //$stmt = $this->dbal->prepare(self::SQL_ONEANDCOMMBYSLUG);
         $filter = "WHERE n.slug = ? ";
         if ($published) {
             $filter = $filter . "AND n.ispublished = true ";
         }
         $filter = $filter . " ORDER BY c.createdat ASC";
-        $sql = sprintf(self::SQL_FINDWITHCOMM, $filter);
+        $sql = sprintf(NewsSQL::SQL_FINDALL, $filter);
         $stmt = $this->dbal->prepare($sql);
         $stmt->bindValue(1, $slug, \PDO::PARAM_STR);
         $stmt->execute();
@@ -144,7 +98,8 @@ class NewsRepository extends Manager {
     }
 
     public function findLasts($nbNews) {
-        $stmt = $this->dbal->prepare(self::SQL_LASTSANDSUB);
+        $sql = sprintf(NewsSQL::SQL_FIND, "WHERE n.ispublished = true ORDER BY n.createdat DESC LIMIT ?");
+        $stmt = $this->dbal->prepare($sql);
         $stmt->bindValue(1, $nbNews, \PDO::PARAM_INT);
         $stmt->execute();
 
@@ -175,7 +130,7 @@ class NewsRepository extends Manager {
     }
 
     private function insert(News $news) {
-        $stmt = $this->dbal->prepare(self::SQL_INSERT);
+        $stmt = $this->dbal->prepare(NewsSQL::SQL_INSERT);
         $stmt->bindValue(1, $news->getAuthor()->getId(), \PDO::PARAM_INT);
         $stmt->bindValue(2, $news->getTitle(), \PDO::PARAM_STR);
         $stmt->bindValue(3, $news->getSlug(), \PDO::PARAM_STR);
@@ -197,7 +152,7 @@ class NewsRepository extends Manager {
     }
 
     private function update(News $news) {
-        $stmt = $this->dbal->prepare(self::SQL_UPDATE);
+        $stmt = $this->dbal->prepare(NewsSQL::SQL_UPDATE);
         $stmt->bindValue(1, $news->getAuthor()->getId(), \PDO::PARAM_INT);
         $stmt->bindValue(2, $news->getTitle(), \PDO::PARAM_STR);
         $stmt->bindValue(3, $news->getSlug(), \PDO::PARAM_STR);
