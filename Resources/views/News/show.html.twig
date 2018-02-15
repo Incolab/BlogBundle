@@ -39,7 +39,7 @@
             <div class="panelCat">
                 
                 <h3>Poster un commentaire</h3>
-                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
                     {{ form_start(form)}}
                     {{ form_widget(form) }}
                 <input type="submit" class="button" value="Submit"/>
